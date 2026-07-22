@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MyHero — SDLC, Jira & Branching Strategy</title>
+<style>
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --border: oklch(0.922 0 0);
+    --radius: 0.25rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.145 0 0);
+      --foreground: oklch(0.985 0 0);
+      --muted: oklch(0.269 0 0);
+      --muted-foreground: oklch(0.708 0 0);
+      --primary: oklch(0.985 0 0);
+      --primary-foreground: oklch(0.205 0 0);
+      --border: oklch(0.269 0 0);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  /* Top bar */
+  header.top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--background);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 24px; height: 48px;
+  }
+  header.top .brand { font-size: 14px; font-weight: 600; }
+  header.top nav { display: flex; gap: 4px; margin-left: auto; }
+  header.top nav a {
+    text-decoration: none; font-size: 13px; font-weight: 500;
+    color: var(--muted-foreground);
+    padding: 6px 10px; border-radius: var(--radius);
+  }
+  header.top nav a:hover { background: var(--muted); color: var(--foreground); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 24px; }
+  main > * + * { margin-top: 16px; }
+
+  .page-title { font-size: 24px; font-weight: 600; }
+  .page-sub { font-size: 14px; color: var(--muted-foreground); margin-top: 4px; max-width: 60ch; }
+  .section-head { font-size: 18px; font-weight: 600; margin-top: 32px; scroll-margin-top: 60px; }
+
+  /* Card */
+  .card { border: 1px solid var(--border); border-radius: var(--radius); }
+  .card > .head { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  .card > .head h2 { font-size: 14px; font-weight: 600; }
+  .card > .body { padding: 16px 20px; }
+  .card > .body > * + * { margin-top: 10px; }
+
+  p { font-size: 14px; }
+  p.muted { color: var(--muted-foreground); }
+  .small { font-size: 12px; color: var(--muted-foreground); }
+
+  ul.bullets { list-style: none; }
+  ul.bullets li { position: relative; padding-left: 16px; font-size: 14px; margin-top: 6px; color: var(--muted-foreground); }
+  ul.bullets li::before { content: "•"; position: absolute; left: 2px; color: var(--muted-foreground); }
+  ul.bullets li strong { color: var(--foreground); font-weight: 500; }
+
+  ol.rules { list-style: decimal; padding-left: 20px; }
+  ol.rules li { font-size: 14px; margin-top: 6px; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .scroll { overflow-x: auto; }
+  th { text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--muted-foreground); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 8px 12px; border-bottom: 1px solid color-mix(in oklch, var(--border) 50%, transparent); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: color-mix(in oklch, var(--muted) 40%, transparent); }
+  td.key { font-weight: 500; white-space: nowrap; }
+  td.mono, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
+
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px; background: var(--muted);
+    padding: 2px 5px; border-radius: var(--radius);
+  }
+  pre {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px; color: var(--muted-foreground);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px; overflow-x: auto; white-space: pre;
+    line-height: 1.5;
+  }
+  pre.flow { white-space: pre-wrap; }
+
+  /* Numbered labeled steps */
+  ol.steps { list-style: none; counter-reset: step; }
+  ol.steps li { counter-increment: step; position: relative; padding: 12px 0 12px 40px; border-top: 1px solid var(--border); }
+  ol.steps li:first-child { border-top: 0; padding-top: 0; }
+  ol.steps li:first-child::before { top: 0; }
+  ol.steps li::before {
+    content: counter(step); position: absolute; left: 0; top: 12px;
+    width: 22px; height: 22px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    background: var(--primary); color: var(--primary-foreground);
+    font-size: 11px; font-weight: 600; font-family: ui-monospace, monospace;
+  }
+  ol.steps .t { font-size: 14px; font-weight: 600; }
+  ol.steps .d { font-size: 13px; color: var(--muted-foreground); margin-top: 3px; }
+
+  .name-group { }
+  .name-group + .name-group { margin-top: 12px; }
+  .name-group .label { font-size: 12px; font-weight: 500; }
+  .name-group .label .note { color: var(--muted-foreground); font-weight: 400; }
+  .name-group ul { list-style: none; margin-top: 4px; }
+  .name-group ul li { margin-top: 4px; }
+
+  .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; margin-top: 4px; }
+  .keys .row { display: flex; gap: 8px; align-items: baseline; }
+  .keys .row .d { font-size: 12px; color: var(--muted-foreground); }
+  .links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; font-size: 12px; }
+  .links a { color: var(--muted-foreground); text-decoration: underline; text-underline-offset: 2px; }
+  .links a:hover { color: var(--foreground); }
+
+  @media (max-width: 640px) { .keys { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand">MyHero — Process</span>
+  <nav>
+    <a href="#sdlc">SDLC / Jira</a>
+    <a href="#branching">Branching</a>
+  </nav>
+</header>
+
+<main>
+  <div>
+    <h1 class="page-title">SDLC, Jira &amp; Branching Strategy</h1>
+    <p class="page-sub">Sistem penggunaan Jira di Henan Asset — kondisi saat ini, usulan perbaikan berbasis Story, jenis tiket, dan strategi branching.</p>
+  </div>
+
+  <!-- ============ SDLC / JIRA ============ -->
+  <h2 class="section-head" id="sdlc">SDLC / Jira</h2>
+
+  <div class="card">
+    <div class="head"><h2>Sistem Jira saat ini</h2></div>
+    <div class="body">
+      <p class="muted">Alur kerja Jira yang berlaku sekarang di board squad — dari Epic sampai sprint planning.</p>
+      <ol class="steps">
+        <li>
+          <div class="t">Epic dibuat oleh IT Product</div>
+          <div class="d">Setiap task berawal dari tiket <strong>Epic</strong> yang dibuat IT Product (Project Manager). Epic merepresentasikan kumpulan task yang akan dikerjakan engineer, dengan target rilis dan due date yang sudah ditetapkan. Epic dipantau di board Jira squad lewat view <strong>Timeline</strong>.</div>
+        </li>
+        <li>
+          <div class="t">Lead breakdown tiket per sprint</div>
+          <div class="d">Dari Epic, <strong>Lead</strong> memecah dan membuat tiket task yang akan dikerjakan dalam satu sprint. Engineer tidak membuat tiket sendiri — kalau butuh tiket baru, harus info ke Lead untuk dibuatkan.</div>
+        </li>
+        <li>
+          <div class="t">Tiket terlalu teknis &amp; terpecah per flow</div>
+          <div class="d">Tiket yang diassign ke engineer sifatnya terlalu teknis. Satu flow yang sama sering dipecah jadi beberapa tiket — mis. pengerjaan "buat permintaan" di satu tiket, sedangkan "approve/reject" di tiket lain. Terlihat <i>fine</i>, tapi satu flow jadi tidak tergambar utuh: jenis kerja (development / enhancement / fixing) dan keterkaitan antar-flow jadi kabur.</div>
+          <div class="d">Analoginya: <i>piece</i> dari <i>puzzle</i>, kita tau itu apa tapi perlu waktu untuk <i>assemble</i></div>
+        </li>
+        <li>
+          <div class="t">QA harus menggeser banyak tiket</div>
+          <div class="d">Karena satu flow terpecah, saat menguji satu alur QA perlu memindahkan beberapa tiket terpisah yang sebenarnya bagian dari flow testing yang sama.</div>
+        </li>
+        <li>
+          <div class="t">Story point sebelum Planning Poker diterapkan</div>
+          <div class="d">Sebelum Planning Poker diterapkan, story point ditentukan di sprint planning dengan bertanya langsung ke assignee. Nilainya rawan terlalu kecil atau terlalu besar karena bergantung pada satu orang.</div>
+        </li>
+        <li>
+          <div class="t">Setelah Planning Poker diterapkan</div>
+          <div class="d">Setelah Planning Poker diterapkan, jika pembuatan tiket masih berorientasi task spesifik, sesi planning jadi lama — jumlah tiket terlalu banyak untuk dibahas satu per satu.</div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Kekurangan sistem sekarang</h2></div>
+    <div class="body">
+      <ul class="bullets">
+        <li>Title tiket belum seragam.</li>
+        <li>Tiket ada, tapi deskripsi tidak lengkap.</li>
+        <li>Satu tiket merepresentasikan satu task spesifik.</li>
+        <li><strong>Task-oriented, bukan project-management-oriented</strong> — Penyebabnya kemungkinan besar karena KPI terikat ke story point pada tiket yang diassign ke engineer/QA.</li>
+        <li>Team member bingung tracking task yang sedang dikerjakan (harus dijelaskan lagi + deskripsi tiket belum ada). New hire perlu extra effort untuk connecting the dot antar tiket.</li>
+        <li>Sprint planning &amp; standup jadi lama jika membahas seluruh tiket (jumlah tiket relatif banyak).</li>
+        <li>Beberapa tiket berpotensi di-push dalam satu PR dan satu branch.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Usulan: model berbasis Story</h2></div>
+    <div class="body">
+      <ul class="bullets">
+        <li>Dari tiket Epic, Lead membuat tiket <strong>Story</strong>. Di dalam Story boleh dibuat <strong>sub-task</strong> teknis oleh engineer/QA. Behaviour tiket saat ini tidak hilang — hanya saja sub-task sudah terkait ke satu Story (progres Story terlihat dari status sub-task). Point diberikan pada sub-task dan menjadi KPI assignee.</li>
+        <li>Judul Story merepresentasikan project, feature/module, sub-feature/module, dan deskripsi singkat. Contoh: <code>[MBO][Customer][Investment Reminder] List Customer Investment Reminders</code>.</li>
+        <li>Setiap deskripsi tiket di bawah Epic (Story) wajib pakai <strong>Gherkin Form</strong>. Epic boleh tanpa Gherkin, tapi harus menyatakan scope, requirement, dan acuan untuk membuat Story.</li>
+        <li>Di sprint planning, yang diestimasi adalah effort pengerjaan Story. Point Story terlihat lebih besar; sub-task-nya di bawah point Story dan menjadi KPI assignee. Perlu dipecah per assignee: <strong>FE / BE / QA / Product Design</strong>.</li>
+        <li>💡Ide: bisa juga dengan cara story point di story ditetapkan menggunakan point scale Fibonacci, namun ada estimate time untuk pengetjaannya dalam hari.</li>
+        <li>Setiap sub-task menjadi tanggung jawab creator-nya (ganti status, penamaan judul &amp; deskripsi). Sub-task juga jadi tracker pekerjaan tiap assignee.</li>
+        <li>Pada saat daily standup, jumlah tiket di Jira Crystal Ball dapat di filter hanya story atau task (sub task tidak perlu ditampilkan). Ini akan mempersingkat waktu Grooming/Planning/Daily Standup.</li>
+      </ul>
+      <p class="muted">Dengan menggunakan tipe tiket Story: effort suatu fitur terlihat lalu di-breakdown (besar → kecil), dan sebuah Story bisa rilis lebih dulu walau satu Epic belum selesai. Story juga membantu branching strategy — nomor tiket branch task &amp; commit message dapat memakai nomor tiket Story.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Jenis tiket</h2></div>
+    <div class="body">
+      <p class="muted">Untuk saat ini kita bergerak dengan tiga jenis inti: <strong>Epic</strong>, <strong>Story</strong>, dan <strong>Sub-task</strong>. Tiga jenis lain melengkapi: <strong>Task</strong> untuk pekerjaan di luar Story, <strong>Bug</strong> untuk cacat pada fitur yang sudah ada, dan <strong>Spike</strong> untuk riset. Ringkasannya:</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Jenis</th><th>Kapan dipakai</th><th>Aturan inti</th></tr></thead>
+          <tbody>
+            <tr><td class="key">Epic</td><td>Inisiatif besar lintas sprint</td><td>Wadah/kontainer, tidak dikerjakan langsung</td></tr>
+            <tr><td class="key">Story</td><td>Satu potong value untuk user, selesai dalam 1 sprint</td><td>Unit utama. Wajib punya acceptance criteria</td></tr>
+            <tr><td class="key">Task</td><td>Pekerjaan tanpa value langsung ke user</td><td>Migrasi DB, scheduler, konfigurasi infra</td></tr>
+            <tr><td class="key">Bug</td><td>Perilaku salah dari fitur yang sudah ada</td><td>Wajib langkah reproduce + expected vs actual</td></tr>
+            <tr><td class="key">Sub-task</td><td>Pecahan teknis di dalam Story</td><td>Tempat yang tepat untuk <code>[BE]</code>/<code>[FE]</code>/<code>[QA]</code>/<code>[PD]</code></td></tr>
+            <tr><td class="key">Spike</td><td>Riset dengan batas waktu (time-boxed)</td><td>Output = keputusan/dokumen. <code>[Tech Spec]</code> sebaiknya Spike</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ol class="steps" style="margin-top:14px">
+        <li>
+          <div class="t">Epic — inisiatif besar lintas sprint</div>
+          <div class="d">Wadah untuk sekumpulan Story yang bergerak menuju satu tujuan besar. Epic tidak dikerjakan langsung; ia dipecah menjadi Story. Dibuat oleh IT Product dan biasanya menyeberang beberapa sprint.</div>
+        </li>
+        <li>
+          <div class="t">Story — unit kerja utama</div>
+          <div class="d">Satu potong value yang bisa dirasakan user dan selesai dalam satu sprint. Ini unit utama tempat estimasi dan progres dibaca. Wajib punya <strong>acceptance criteria</strong> (ditulis dalam Gherkin). Satu Story boleh dipecah lagi menjadi sub-task per disiplin.</div>
+        </li>
+        <li>
+          <div class="t">Sub-task — pecahan teknis di dalam Story</div>
+          <div class="d">Bagian teknis dari sebuah Story, dibuat engineer/QA. Inilah tempat yang tepat untuk tag peran <code>[BE]</code>/<code>[FE]</code>/<code>[QA]</code>/<code>[PD]</code>. Point pada sub-task menjadi KPI assignee, dan status sub-task memperlihatkan progres Story.</div>
+        </li>
+        <li>
+          <div class="t">Task — pekerjaan di luar Story</div>
+          <div class="d">Pekerjaan yang perlu dikerjakan tapi tidak memberi value langsung ke user — mis. <strong>tech debt</strong>, migrasi DB, scheduler, atau konfigurasi infra. Dipakai untuk hal-hal yang tidak cocok dibungkus dalam suatu Story.</div>
+        </li>
+        <li>
+          <div class="t">Bug — cacat pada fitur yang sudah ada</div>
+          <div class="d">Dibuat saat sebuah Story sudah selesai development dan sudah dites QA, lalu ditemukan perilaku yang salah. Wajib menyertakan langkah <strong>reproduce</strong> serta <strong>expected vs actual</strong>. Selengkapnya akan menggunakan tools <a href="https://qatrail.hpam.id" target="_blank" rel="noreferrer">QATrail</a>.</div>
+        </li>
+        <li>
+          <div class="t">Spike — riset time-boxed</div>
+          <div class="d">Untuk riset atau eksplorasi teknis dengan batas waktu. Jenis Spike belum ada di board Jira existing, jadi dibuat memakai jenis <strong>Task</strong> dengan tag <code>[Spike]</code> pada judul. Outputnya berupa keputusan/dokumen, dan point-nya menjadi representasi timebox.</div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Penamaan tiket</h2></div>
+    <div class="body">
+      <div class="name-group">
+        <div class="label">Epic <span class="note">— sesuai title dari tim Product</span></div>
+      </div>
+      <div class="name-group">
+        <div class="label">Story — <span class="note">[Project][Module][Sub-module] Short description</span></div>
+        <ul>
+          <li><code>[MBO][Customer][Investment Reminder] List Customer Investment Reminders</code></li>
+          <li><code>[MyHero App][Alpha Circle][Entry] Access &amp; Detail Page</code></li>
+        </ul>
+      </div>
+      <div class="name-group">
+        <div class="label">Sub-task pada Story</div>
+        <ul>
+          <li><code>[FE] Revamp UI</code></li>
+          <li><code>[FE] Integrasi dengan API</code></li>
+          <li><code>[BE] CRUD list data nasabah</code></li>
+          <li><code>[BE] Unit test</code></li>
+        </ul>
+      </div>
+      <div class="name-group">
+        <div class="label">Task <span class="note">— di luar Story (spike / tech debt); point = representasi timebox</span></div>
+        <ul>
+          <li><code>[Spike][MyHero App][FE] Research implementation SDK Moengage</code></li>
+          <li><code>[Tech Debt][MBO] Refactor penggunaan service mangrove</code></li>
+        </ul>
+      </div>
+      <div class="name-group">
+        <div class="label">Sub-task pada Task <span class="note">— tidak perlu point</span></div>
+        <ul>
+          <li><code>Slicing UI</code></li>
+          <li><code>Delete section card alpha circle pada halaman profile</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Alur pembuatan tiket &amp; ritual</h2></div>
+    <div class="body">
+      <pre class="flow">PM builds Epic → breakdown Story by Lead + Task/sub-task
+→ Grooming (mid-sprint) → Sprint Planning + Planning Poker (SP)
+→ Development (BE/FE) + QA → Release (by priority &amp; plan)</pre>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Ritual</th><th>Kapan</th><th>Output</th></tr></thead>
+          <tbody>
+            <tr><td class="key">Sprint</td><td>1–2 minggu (rata-rata 2)</td><td>Batch pekerjaan yang dikomit</td></tr>
+            <tr><td class="key">Daily Standup</td><td>Setiap pagi</td><td>Blocker diangkat, tiket bergerak ke kanan</td></tr>
+            <tr><td class="key">Grooming</td><td>Tengah sprint</td><td>Tim paham tiket Epic berikutnya</td></tr>
+            <tr><td class="key">Sprint Planning + Poker</td><td>Sebelum sprint baru</td><td>Story Point disepakati, tiket siap</td></tr>
+            <tr><td class="key">Review / Demo</td><td>Akhir sprint</td><td>Story yang Done didemokan</td></tr>
+            <tr><td class="key">Retro</td><td>Akhir sprint</td><td>1–3 perbaikan proses</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Gherkin — acceptance criteria</h2></div>
+    <div class="body">
+      <p class="muted">Gherkin: bahasa teks Given/When/Then untuk mendefinisikan acceptance criteria &amp; skenario test — menjembatani tim teknis dan bisnis. Template standar untuk fitur form submission:</p>
+      <pre>Feature: User Form Submission
+  As a website visitor
+  I want to fill out and submit a form
+  So that I can send my information to the system
+
+  Scenario: Successful form submission with valid data
+    Given I am on the "Contact Us" page
+    When I fill in the following details:
+      | Field   | Value            |
+      | Name    | John Doe         |
+      | Email   | john@example.com |
+      | Message | Hello World      |
+    And I click the "Submit" button
+    Then I should see "Form submitted successfully"
+    And my information should be saved in the database
+
+  Scenario: Missing required field
+    Given I am on the "Contact Us" page
+    When I leave the "Email" field blank
+    And I click the "Submit" button
+    Then I should see "Email is required"
+    And the form should not be submitted</pre>
+      <div class="keys">
+        <div class="row"><code>Feature</code><span class="d">High-level functionality under test.</span></div>
+        <div class="row"><code>Scenario</code><span class="d">A specific use case of the feature.</span></div>
+        <div class="row"><code>Given</code><span class="d">Initial context / precondition.</span></div>
+        <div class="row"><code>When</code><span class="d">The action or event.</span></div>
+        <div class="row"><code>Then</code><span class="d">Expected outcome.</span></div>
+        <div class="row"><code>And / But</code><span class="d">Chain multiple steps logically.</span></div>
+      </div>
+      <div class="links">
+        <a href="https://cucumber.io/docs/gherkin/" target="_blank" rel="noreferrer">Cucumber.io — Gherkin reference</a>
+        <a href="https://testquality.com/gherkin-user-stories-acceptance-criteria-guide/" target="_blank" rel="noreferrer">TestQuality — Gherkin + Agile user stories</a>
+        <a href="https://support.smartbear.com/cucumberstudio/docs/bdd/write-gherkin-scenarios.html" target="_blank" rel="noreferrer">SmartBear — writing Gherkin scenarios</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BRANCHING ============ -->
+  <h2 class="section-head" id="branching">Branching Strategy</h2>
+
+  <div class="card">
+    <div class="head"><h2>Golden Rules</h2></div>
+    <div class="body">
+      <ol class="rules">
+        <li>Never commit directly to <code>main</code>, <code>prod-issue/*</code> and <code>feature/*</code>.</li>
+        <li>Every branch must reference a Jira ticket (except <code>main</code>, <code>prod-issue/*</code> and <code>feature/*</code>).</li>
+        <li>Every commit message must reference a Jira ticket.</li>
+        <li>One task = one branch.</li>
+        <li>Always create Pull Requests.</li>
+        <li>QA must approve before production.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Branch Types</h2></div>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Pattern</th><th>From</th><th>PR</th><th>Created by</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>main</code></td><td class="mono">—</td><td class="mono">—</td><td>default</td><td>Production-ready state. Protected — no direct commits, PR + QA approval + release docs required.</td></tr>
+            <tr><td><code>feature/[FEATURE_NAME]</code></td><td class="mono">main</td><td class="mono">→ main</td><td>lead</td><td>Sprint-scoped integration branch. Source for staging builds. Temporary (replaces Gitflow's develop + release).</td></tr>
+            <tr><td><code>feat/[FEATURE]/[JIRA]-desc</code></td><td class="mono">feature/*</td><td class="mono">→ feature/*</td><td>contributor</td><td>One Jira ticket = one task branch. All development happens here.</td></tr>
+            <tr><td><code>fix/[FEATURE]/[JIRA]-desc</code></td><td class="mono">feature/*</td><td class="mono">→ feature/*</td><td>contributor</td><td>Defect fix found during QA. Fix → merge → rebuild → QA, repeat until approved.</td></tr>
+            <tr><td><code>build-qa/[feat-A-B-C]</code></td><td class="mono">(multi feature)</td><td class="mono">—</td><td>contributor</td><td>Custom QA build combining multiple features (cross-feature/regression). Testing only — no development.</td></tr>
+            <tr><td><code>prod-issue/[vX.Y.Z]</code></td><td class="mono">main</td><td class="mono">→ main</td><td>lead</td><td>Controlled production hotfix integration branch, per app version.</td></tr>
+            <tr><td><code>fix-prod-issue/[vX.Y.Z]/[JIRA]-desc</code></td><td class="mono">prod-issue/*</td><td class="mono">→ prod-issue/*</td><td>contributor</td><td>Individual production fix task under a prod-issue branch.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Naming Examples</h2></div>
+    <div class="body">
+      <ul class="bullets" style="list-style:none">
+        <li style="padding-left:10"><code>feature/revamp-kyc</code></li>
+        <li style="padding-left:10"><code>feat/revamp-kyc/ATH-276-revamp-kyc-1</code></li>
+        <li style="padding-left:10"><code>fix/revamp-kyc/ATH-310-fix-kyc-validation</code></li>
+        <li style="padding-left:10"><code>build-qa/revamp-kyc-user-profile-payment</code></li>
+        <li style="padding-left:10"><code>prod-issue/v2.4.1</code></li>
+        <li style="padding-left:10"><code>fix-prod-issue/v2.4.1/ATH-402-fix-login-crash</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Incident SLA</h2></div>
+    <div class="body">
+      <p class="muted">Menentukan prioritas <code>prod-issue/*</code>. Ack = waktu merespons; Fix = waktu menyelesaikan.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Level</th><th>Impact</th><th>Ack</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td class="key">P0 — Critical</td><td>Total system down, mass transaction failure</td><td class="mono">&lt; 30 min</td><td class="mono">&lt; 4 h</td></tr>
+            <tr><td class="key">P1 — High</td><td>Main feature broken, system still up</td><td class="mono">&lt; 2 h</td><td class="mono">&lt; 1 workday</td></tr>
+            <tr><td class="key">P2 — Medium</td><td>Functional bug with workaround</td><td class="mono">&lt; 8 h</td><td class="mono">&lt; 3–5 workdays</td></tr>
+            <tr><td class="key">P3 — Low</td><td>Cosmetic, typo, or new feature request</td><td class="mono">&lt; 24 h</td><td class="mono">backlog</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small">SLA dihitung jam kerja (Sen–Jum 09:00–18:00) kecuali Critical; tidak termasuk waktu approval Play/App Store &amp; pihak ketiga. Laporkan insiden ke Lead (bug prod: Lead + PM). Post-mortem blameless: Root Cause Analysis (RCA), bukan menyalahkan.</p>
+    </div>
+  </div>
+</main>
+</body>
+</html>
