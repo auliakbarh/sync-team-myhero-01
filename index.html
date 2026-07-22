@@ -1,141 +1,141 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MyHero — SDLC, Jira & Branching Strategy</title>
-<style>
-  :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --border: oklch(0.922 0 0);
-    --radius: 0.25rem;
-  }
-  @media (prefers-color-scheme: dark) {
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyHero — SDLC, Jira & Branching Strategy</title>
+  <style>
     :root {
-      --background: oklch(0.145 0 0);
-      --foreground: oklch(0.985 0 0);
-      --muted: oklch(0.269 0 0);
-      --muted-foreground: oklch(0.708 0 0);
-      --primary: oklch(0.985 0 0);
-      --primary-foreground: oklch(0.205 0 0);
-      --border: oklch(0.269 0 0);
+      --background: oklch(1 0 0);
+      --foreground: oklch(0.145 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --primary: oklch(0.205 0 0);
+      --primary-foreground: oklch(0.985 0 0);
+      --border: oklch(0.922 0 0);
+      --radius: 0.25rem;
     }
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: system-ui, -apple-system, sans-serif;
-    background: var(--background);
-    color: var(--foreground);
-    font-size: 14px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: oklch(0.145 0 0);
+        --foreground: oklch(0.985 0 0);
+        --muted: oklch(0.269 0 0);
+        --muted-foreground: oklch(0.708 0 0);
+        --primary: oklch(0.985 0 0);
+        --primary-foreground: oklch(0.205 0 0);
+        --border: oklch(0.269 0 0);
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
 
-  /* Top bar */
-  header.top {
-    position: sticky; top: 0; z-index: 50;
-    background: var(--background);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 16px;
-    padding: 0 24px; height: 48px;
-  }
-  header.top .brand { font-size: 14px; font-weight: 600; }
-  header.top nav { display: flex; gap: 4px; margin-left: auto; }
-  header.top nav a {
-    text-decoration: none; font-size: 13px; font-weight: 500;
-    color: var(--muted-foreground);
-    padding: 6px 10px; border-radius: var(--radius);
-  }
-  header.top nav a:hover { background: var(--muted); color: var(--foreground); }
+    /* Top bar */
+    header.top {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--background);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 24px; height: 48px;
+    }
+    header.top .brand { font-size: 14px; font-weight: 600; }
+    header.top nav { display: flex; gap: 4px; margin-left: auto; }
+    header.top nav a {
+      text-decoration: none; font-size: 13px; font-weight: 500;
+      color: var(--muted-foreground);
+      padding: 6px 10px; border-radius: var(--radius);
+    }
+    header.top nav a:hover { background: var(--muted); color: var(--foreground); }
 
-  main { max-width: 900px; margin: 0 auto; padding: 24px; }
-  main > * + * { margin-top: 16px; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px; }
+    main > * + * { margin-top: 16px; }
 
-  .page-title { font-size: 24px; font-weight: 600; }
-  .page-sub { font-size: 14px; color: var(--muted-foreground); margin-top: 4px; max-width: 60ch; }
-  .section-head { font-size: 18px; font-weight: 600; margin-top: 32px; scroll-margin-top: 60px; }
+    .page-title { font-size: 24px; font-weight: 600; }
+    .page-sub { font-size: 14px; color: var(--muted-foreground); margin-top: 4px; max-width: 60ch; }
+    .section-head { font-size: 18px; font-weight: 600; margin-top: 32px; scroll-margin-top: 60px; }
 
-  /* Card */
-  .card { border: 1px solid var(--border); border-radius: var(--radius); }
-  .card > .head { padding: 14px 20px; border-bottom: 1px solid var(--border); }
-  .card > .head h2 { font-size: 14px; font-weight: 600; }
-  .card > .body { padding: 16px 20px; }
-  .card > .body > * + * { margin-top: 10px; }
+    /* Card */
+    .card { border: 1px solid var(--border); border-radius: var(--radius); }
+    .card > .head { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .card > .head h2 { font-size: 14px; font-weight: 600; }
+    .card > .body { padding: 16px 20px; }
+    .card > .body > * + * { margin-top: 10px; }
 
-  p { font-size: 14px; }
-  p.muted { color: var(--muted-foreground); }
-  .small { font-size: 12px; color: var(--muted-foreground); }
+    p { font-size: 14px; }
+    p.muted { color: var(--muted-foreground); }
+    .small { font-size: 12px; color: var(--muted-foreground); }
 
-  ul.bullets { list-style: none; }
-  ul.bullets li { position: relative; padding-left: 16px; font-size: 14px; margin-top: 6px; color: var(--muted-foreground); }
-  ul.bullets li::before { content: "•"; position: absolute; left: 2px; color: var(--muted-foreground); }
-  ul.bullets li strong { color: var(--foreground); font-weight: 500; }
+    ul.bullets { list-style: none; }
+    ul.bullets li { position: relative; padding-left: 16px; font-size: 14px; margin-top: 6px; color: var(--muted-foreground); }
+    ul.bullets li::before { content: "•"; position: absolute; left: 2px; color: var(--muted-foreground); }
+    ul.bullets li strong { color: var(--foreground); font-weight: 500; }
 
-  ol.rules { list-style: decimal; padding-left: 20px; }
-  ol.rules li { font-size: 14px; margin-top: 6px; }
+    ol.rules { list-style: decimal; padding-left: 20px; }
+    ol.rules li { font-size: 14px; margin-top: 6px; }
 
-  /* Table */
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .scroll { overflow-x: auto; }
-  th { text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--muted-foreground); border-bottom: 1px solid var(--border); white-space: nowrap; }
-  td { padding: 8px 12px; border-bottom: 1px solid color-mix(in oklch, var(--border) 50%, transparent); vertical-align: top; }
-  tr:last-child td { border-bottom: 0; }
-  tbody tr:hover { background: color-mix(in oklch, var(--muted) 40%, transparent); }
-  td.key { font-weight: 500; white-space: nowrap; }
-  td.mono, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .scroll { overflow-x: auto; }
+    th { text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--muted-foreground); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 8px 12px; border-bottom: 1px solid color-mix(in oklch, var(--border) 50%, transparent); vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: color-mix(in oklch, var(--muted) 40%, transparent); }
+    td.key { font-weight: 500; white-space: nowrap; }
+    td.mono, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
 
-  code {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px; background: var(--muted);
-    padding: 2px 5px; border-radius: var(--radius);
-  }
-  pre {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px; color: var(--muted-foreground);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 12px; overflow-x: auto; white-space: pre;
-    line-height: 1.5;
-  }
-  pre.flow { white-space: pre-wrap; }
+    code {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 12px; background: var(--muted);
+      padding: 2px 5px; border-radius: var(--radius);
+    }
+    pre {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 12px; color: var(--muted-foreground);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 12px; overflow-x: auto; white-space: pre;
+      line-height: 1.5;
+    }
+    pre.flow { white-space: pre-wrap; }
 
-  /* Numbered labeled steps */
-  ol.steps { list-style: none; counter-reset: step; }
-  ol.steps li { counter-increment: step; position: relative; padding: 12px 0 12px 40px; border-top: 1px solid var(--border); }
-  ol.steps li:first-child { border-top: 0; padding-top: 0; }
-  ol.steps li:first-child::before { top: 0; }
-  ol.steps li::before {
-    content: counter(step); position: absolute; left: 0; top: 12px;
-    width: 22px; height: 22px; border-radius: var(--radius);
-    display: flex; align-items: center; justify-content: center;
-    background: var(--primary); color: var(--primary-foreground);
-    font-size: 11px; font-weight: 600; font-family: ui-monospace, monospace;
-  }
-  ol.steps .t { font-size: 14px; font-weight: 600; }
-  ol.steps .d { font-size: 13px; color: var(--muted-foreground); margin-top: 3px; }
+    /* Numbered labeled steps */
+    ol.steps { list-style: none; counter-reset: step; }
+    ol.steps li { counter-increment: step; position: relative; padding: 12px 0 12px 40px; border-top: 1px solid var(--border); }
+    ol.steps li:first-child { border-top: 0; padding-top: 0; }
+    ol.steps li:first-child::before { top: 0; }
+    ol.steps li::before {
+      content: counter(step); position: absolute; left: 0; top: 12px;
+      width: 22px; height: 22px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--primary); color: var(--primary-foreground);
+      font-size: 11px; font-weight: 600; font-family: ui-monospace, monospace;
+    }
+    ol.steps .t { font-size: 14px; font-weight: 600; }
+    ol.steps .d { font-size: 13px; color: var(--muted-foreground); margin-top: 3px; }
 
-  .name-group { }
-  .name-group + .name-group { margin-top: 12px; }
-  .name-group .label { font-size: 12px; font-weight: 500; }
-  .name-group .label .note { color: var(--muted-foreground); font-weight: 400; }
-  .name-group ul { list-style: none; margin-top: 4px; }
-  .name-group ul li { margin-top: 4px; }
+    .name-group { }
+    .name-group + .name-group { margin-top: 12px; }
+    .name-group .label { font-size: 12px; font-weight: 500; }
+    .name-group .label .note { color: var(--muted-foreground); font-weight: 400; }
+    .name-group ul { list-style: none; margin-top: 4px; }
+    .name-group ul li { margin-top: 4px; }
 
-  .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; margin-top: 4px; }
-  .keys .row { display: flex; gap: 8px; align-items: baseline; }
-  .keys .row .d { font-size: 12px; color: var(--muted-foreground); }
-  .links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; font-size: 12px; }
-  .links a { color: var(--muted-foreground); text-decoration: underline; text-underline-offset: 2px; }
-  .links a:hover { color: var(--foreground); }
+    .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; margin-top: 4px; }
+    .keys .row { display: flex; gap: 8px; align-items: baseline; }
+    .keys .row .d { font-size: 12px; color: var(--muted-foreground); }
+    .links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; font-size: 12px; }
+    .links a { color: var(--muted-foreground); text-decoration: underline; text-underline-offset: 2px; }
+    .links a:hover { color: var(--foreground); }
 
-  @media (max-width: 640px) { .keys { grid-template-columns: 1fr; } }
-</style>
+    @media (max-width: 640px) { .keys { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
 <header class="top">
@@ -228,12 +228,12 @@
         <table>
           <thead><tr><th>Jenis</th><th>Kapan dipakai</th><th>Aturan inti</th></tr></thead>
           <tbody>
-            <tr><td class="key">Epic</td><td>Inisiatif besar lintas sprint</td><td>Wadah/kontainer, tidak dikerjakan langsung</td></tr>
-            <tr><td class="key">Story</td><td>Satu potong value untuk user, selesai dalam 1 sprint</td><td>Unit utama. Wajib punya acceptance criteria</td></tr>
-            <tr><td class="key">Task</td><td>Pekerjaan tanpa value langsung ke user</td><td>Migrasi DB, scheduler, konfigurasi infra</td></tr>
-            <tr><td class="key">Bug</td><td>Perilaku salah dari fitur yang sudah ada</td><td>Wajib langkah reproduce + expected vs actual</td></tr>
-            <tr><td class="key">Sub-task</td><td>Pecahan teknis di dalam Story</td><td>Tempat yang tepat untuk <code>[BE]</code>/<code>[FE]</code>/<code>[QA]</code>/<code>[PD]</code></td></tr>
-            <tr><td class="key">Spike</td><td>Riset dengan batas waktu (time-boxed)</td><td>Output = keputusan/dokumen. <code>[Tech Spec]</code> sebaiknya Spike</td></tr>
+          <tr><td class="key">Epic</td><td>Inisiatif besar lintas sprint</td><td>Wadah/kontainer, tidak dikerjakan langsung</td></tr>
+          <tr><td class="key">Story</td><td>Satu potong value untuk user, selesai dalam 1 sprint</td><td>Unit utama. Wajib punya acceptance criteria</td></tr>
+          <tr><td class="key">Task</td><td>Pekerjaan tanpa value langsung ke user</td><td>Migrasi DB, scheduler, konfigurasi infra</td></tr>
+          <tr><td class="key">Bug</td><td>Perilaku salah dari fitur yang sudah ada</td><td>Wajib langkah reproduce + expected vs actual</td></tr>
+          <tr><td class="key">Sub-task</td><td>Pecahan teknis di dalam Story</td><td>Tempat yang tepat untuk <code>[BE]</code>/<code>[FE]</code>/<code>[QA]</code>/<code>[PD]</code></td></tr>
+          <tr><td class="key">Spike</td><td>Riset dengan batas waktu (time-boxed)</td><td>Output = keputusan/dokumen. <code>[Tech Spec]</code> sebaiknya Spike</td></tr>
           </tbody>
         </table>
       </div>
@@ -316,12 +316,12 @@
         <table>
           <thead><tr><th>Ritual</th><th>Kapan</th><th>Output</th></tr></thead>
           <tbody>
-            <tr><td class="key">Sprint</td><td>1–2 minggu (rata-rata 2)</td><td>Batch pekerjaan yang dikomit</td></tr>
-            <tr><td class="key">Daily Standup</td><td>Setiap pagi</td><td>Blocker diangkat, tiket bergerak ke kanan</td></tr>
-            <tr><td class="key">Grooming</td><td>Tengah sprint</td><td>Tim paham tiket Epic berikutnya</td></tr>
-            <tr><td class="key">Sprint Planning + Poker</td><td>Sebelum sprint baru</td><td>Story Point disepakati, tiket siap</td></tr>
-            <tr><td class="key">Review / Demo</td><td>Akhir sprint</td><td>Story yang Done didemokan</td></tr>
-            <tr><td class="key">Retro</td><td>Akhir sprint</td><td>1–3 perbaikan proses</td></tr>
+          <tr><td class="key">Sprint</td><td>1–2 minggu (rata-rata 2)</td><td>Batch pekerjaan yang dikomit</td></tr>
+          <tr><td class="key">Daily Standup</td><td>Setiap pagi</td><td>Blocker diangkat, tiket bergerak ke kanan</td></tr>
+          <tr><td class="key">Grooming</td><td>Tengah sprint</td><td>Tim paham tiket Epic berikutnya</td></tr>
+          <tr><td class="key">Sprint Planning + Poker</td><td>Sebelum sprint baru</td><td>Story Point disepakati, tiket siap</td></tr>
+          <tr><td class="key">Review / Demo</td><td>Akhir sprint</td><td>Story yang Done didemokan</td></tr>
+          <tr><td class="key">Retro</td><td>Akhir sprint</td><td>1–3 perbaikan proses</td></tr>
           </tbody>
         </table>
       </div>
@@ -394,13 +394,13 @@
         <table>
           <thead><tr><th>Pattern</th><th>From</th><th>PR</th><th>Created by</th><th>Purpose</th></tr></thead>
           <tbody>
-            <tr><td><code>main</code></td><td class="mono">—</td><td class="mono">—</td><td>default</td><td>Production-ready state. Protected — no direct commits, PR + QA approval + release docs required.</td></tr>
-            <tr><td><code>feature/[FEATURE_NAME]</code></td><td class="mono">main</td><td class="mono">→ main</td><td>lead</td><td>Sprint-scoped integration branch. Source for staging builds. Temporary (replaces Gitflow's develop + release).</td></tr>
-            <tr><td><code>feat/[FEATURE]/[JIRA]-desc</code></td><td class="mono">feature/*</td><td class="mono">→ feature/*</td><td>contributor</td><td>One Jira ticket = one task branch. All development happens here.</td></tr>
-            <tr><td><code>fix/[FEATURE]/[JIRA]-desc</code></td><td class="mono">feature/*</td><td class="mono">→ feature/*</td><td>contributor</td><td>Defect fix found during QA. Fix → merge → rebuild → QA, repeat until approved.</td></tr>
-            <tr><td><code>build-qa/[feat-A-B-C]</code></td><td class="mono">(multi feature)</td><td class="mono">—</td><td>contributor</td><td>Custom QA build combining multiple features (cross-feature/regression). Testing only — no development.</td></tr>
-            <tr><td><code>prod-issue/[vX.Y.Z]</code></td><td class="mono">main</td><td class="mono">→ main</td><td>lead</td><td>Controlled production hotfix integration branch, per app version.</td></tr>
-            <tr><td><code>fix-prod-issue/[vX.Y.Z]/[JIRA]-desc</code></td><td class="mono">prod-issue/*</td><td class="mono">→ prod-issue/*</td><td>contributor</td><td>Individual production fix task under a prod-issue branch.</td></tr>
+          <tr><td><code>main</code></td><td class="mono">—</td><td class="mono">—</td><td>default</td><td>Production-ready state. Protected — no direct commits, PR + QA approval + release docs required.</td></tr>
+          <tr><td><code>feature/[FEATURE_NAME]</code></td><td class="mono">main</td><td class="mono">→ main</td><td>lead</td><td>Sprint-scoped integration branch. Source for staging builds. Temporary (replaces Gitflow's develop + release).</td></tr>
+          <tr><td><code>feat/[FEATURE]/[JIRA]-desc</code></td><td class="mono">feature/*</td><td class="mono">→ feature/*</td><td>contributor</td><td>One Jira ticket = one task branch. All development happens here.</td></tr>
+          <tr><td><code>fix/[FEATURE]/[JIRA]-desc</code></td><td class="mono">feature/*</td><td class="mono">→ feature/*</td><td>contributor</td><td>Defect fix found during QA. Fix → merge → rebuild → QA, repeat until approved.</td></tr>
+          <tr><td><code>build-qa/[feat-A-B-C]</code></td><td class="mono">(multi feature)</td><td class="mono">—</td><td>contributor</td><td>Custom QA build combining multiple features (cross-feature/regression). Testing only — no development.</td></tr>
+          <tr><td><code>prod-issue/[vX.Y.Z]</code></td><td class="mono">main</td><td class="mono">→ main</td><td>lead</td><td>Controlled production hotfix integration branch, per app version.</td></tr>
+          <tr><td><code>fix-prod-issue/[vX.Y.Z]/[JIRA]-desc</code></td><td class="mono">prod-issue/*</td><td class="mono">→ prod-issue/*</td><td>contributor</td><td>Individual production fix task under a prod-issue branch.</td></tr>
           </tbody>
         </table>
       </div>
@@ -411,12 +411,12 @@
     <div class="head"><h2>Naming Examples</h2></div>
     <div class="body">
       <ul class="bullets" style="list-style:none">
-        <li style="padding-left:10"><code>feature/revamp-kyc</code></li>
-        <li style="padding-left:10"><code>feat/revamp-kyc/ATH-276-revamp-kyc-1</code></li>
-        <li style="padding-left:10"><code>fix/revamp-kyc/ATH-310-fix-kyc-validation</code></li>
-        <li style="padding-left:10"><code>build-qa/revamp-kyc-user-profile-payment</code></li>
-        <li style="padding-left:10"><code>prod-issue/v2.4.1</code></li>
-        <li style="padding-left:10"><code>fix-prod-issue/v2.4.1/ATH-402-fix-login-crash</code></li>
+        <li style="padding-left:10px"><code>feature/revamp-kyc</code></li>
+        <li style="padding-left:10px"><code>feat/revamp-kyc/ATH-276-revamp-kyc-1</code></li>
+        <li style="padding-left:10px"><code>fix/revamp-kyc/ATH-310-fix-kyc-validation</code></li>
+        <li style="padding-left:10px"><code>build-qa/revamp-kyc-user-profile-payment</code></li>
+        <li style="padding-left:10px"><code>prod-issue/v2.4.1</code></li>
+        <li style="padding-left:10px"><code>fix-prod-issue/v2.4.1/ATH-402-fix-login-crash</code></li>
       </ul>
     </div>
   </div>
@@ -429,10 +429,10 @@
         <table>
           <thead><tr><th>Level</th><th>Impact</th><th>Ack</th><th>Fix</th></tr></thead>
           <tbody>
-            <tr><td class="key">P0 — Critical</td><td>Total system down, mass transaction failure</td><td class="mono">&lt; 30 min</td><td class="mono">&lt; 4 h</td></tr>
-            <tr><td class="key">P1 — High</td><td>Main feature broken, system still up</td><td class="mono">&lt; 2 h</td><td class="mono">&lt; 1 workday</td></tr>
-            <tr><td class="key">P2 — Medium</td><td>Functional bug with workaround</td><td class="mono">&lt; 8 h</td><td class="mono">&lt; 3–5 workdays</td></tr>
-            <tr><td class="key">P3 — Low</td><td>Cosmetic, typo, or new feature request</td><td class="mono">&lt; 24 h</td><td class="mono">backlog</td></tr>
+          <tr><td class="key">P0 — Critical</td><td>Total system down, mass transaction failure</td><td class="mono">&lt; 30 min</td><td class="mono">&lt; 4 h</td></tr>
+          <tr><td class="key">P1 — High</td><td>Main feature broken, system still up</td><td class="mono">&lt; 2 h</td><td class="mono">&lt; 1 workday</td></tr>
+          <tr><td class="key">P2 — Medium</td><td>Functional bug with workaround</td><td class="mono">&lt; 8 h</td><td class="mono">&lt; 3–5 workdays</td></tr>
+          <tr><td class="key">P3 — Low</td><td>Cosmetic, typo, or new feature request</td><td class="mono">&lt; 24 h</td><td class="mono">backlog</td></tr>
           </tbody>
         </table>
       </div>
